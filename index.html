@@ -3,34 +3,163 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CODEX</title>
+    <title>Tobi Finance Dashboard</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <!-- Styles -->
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <div class="dashboard">
-      <header class="dashboard__header">
-        <h1 class="dashboard__title">Tobias Ponce de Leon</h1>
-        <p class="dashboard__subtitle">Welcome to your personal command center.</p>
-      </header>
-      <main class="dashboard__content">
-        <section class="dashboard__card">
-          <h2 class="dashboard__card-title">Daily Inspiration</h2>
-          <p>
-            Amidst a constellation of possibilities, your curiosity sparks the ideas that
-            illuminate new adventures. Let today be the chapter where bold questions meet
-            brilliant solutions.
-          </p>
+    <div class="app">
+      <!-- Sidebar -->
+      <aside class="sidebar" id="sidebar" aria-label="Primary">
+        <div class="sidebar__inner">
+          <div class="sidebar__brand">
+            <div class="sidebar__logo">💸</div>
+            <span class="sidebar__name">Tobi Finance</span>
+          </div>
+          <nav class="sidebar__nav">
+            <button class="nav__item is-active" aria-current="page">
+              <span class="nav__icon" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 10.5L12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-10.5Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+              <span class="nav__label">Overview</span>
+            </button>
+            <button class="nav__item">
+              <span class="nav__icon" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 6h16M4 12h16M4 18h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              </span>
+              <span class="nav__label">Expenses</span>
+            </button>
+            <button class="nav__item">
+              <span class="nav__icon" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 12l4 4 8-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+              <span class="nav__label">Income</span>
+            </button>
+            <button class="nav__item">
+              <span class="nav__icon" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2v20M6 8l6-6 6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+              <span class="nav__label">Goals</span>
+            </button>
+            <button class="nav__item">
+              <span class="nav__icon" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" stroke="currentColor" stroke-width="1.5"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09c0-.67-.39-1.28-1-1.51a1.65 1.65 0 0 0-1.82.33l-.06.06A2 2 0 1 1 4.4 19.4l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09c.67 0 1.28-.39 1.51-1a1.65 1.65 0 0 0-.33-1.82l-.06-.06A2 2 0 1 1 4.4 4.6l.06.06c.49.49 1.2.64 1.82.33.61-.23 1-.84 1-1.51V3a2 2 0 1 1 4 0v.09c0 .67.39 1.28 1 1.51.62.31 1.33.16 1.82-.33l.06-.06A2 2 0 1 1 19.4 4.6l-.06.06c-.49.49-.64 1.2-.33 1.82.23.61.84 1 1.51 1H21a2 2 0 1 1 0 4h-.09c-.67 0-1.28.39-1.51 1Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              </span>
+              <span class="nav__label">Settings</span>
+            </button>
+          </nav>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <div class="main">
+        <!-- Top Bar -->
+        <header class="topbar">
+          <button class="topbar__menu" id="menuToggle" aria-label="Toggle menu">
+            <span></span><span></span><span></span>
+          </button>
+          <div class="topbar__greeting">
+            <h1>Welcome back, Tobias 👋</h1>
+            <p>Tobias Ponce de Leon</p>
+          </div>
+          <div class="topbar__profile" aria-label="User profile" title="Tobias Ponce de Leon">
+            <div class="avatar">TP</div>
+            <button class="btn btn--primary topbar__action" id="addExpenseTop">Add Expense</button>
+          </div>
+        </header>
+
+        <!-- Stats Cards -->
+        <section class="stats">
+          <article class="card card--stat">
+            <div class="card__label">Total Balance</div>
+            <div class="card__value">$12,450</div>
+          </article>
+          <article class="card card--stat">
+            <div class="card__label">Monthly Expenses</div>
+            <div class="card__value">$1,820</div>
+          </article>
+          <article class="card card--stat">
+            <div class="card__label">Savings Rate</div>
+            <div class="card__value">22%</div>
+          </article>
         </section>
-        <section class="dashboard__card">
-          <h2 class="dashboard__card-title">Random Musings</h2>
-          <p>
-            Somewhere between a cup of coffee and a daring goal, progress is quietly brewing.
-            Keep an eye out for serendipitous insights&mdash;they tend to arrive when you least
-            expect them.
-          </p>
+
+        <!-- Financial Overview Placeholder -->
+        <section class="overview">
+          <h2>Financial Overview</h2>
+          <div class="overview__placeholder">
+            <div class="placeholder__chart"></div>
+            <p>Charts and analytics will appear here.</p>
+          </div>
         </section>
-      </main>
+      </div>
+
+      <!-- Floating Add Expense Button (mobile) -->
+      <button class="fab btn--primary" id="addExpenseFab" aria-label="Add expense">＋</button>
+
+      <!-- Modal: Add Expense -->
+      <div class="modal" id="expenseModal" aria-hidden="true" role="dialog" aria-modal="true">
+        <div class="modal__backdrop" id="modalBackdrop"></div>
+        <div class="modal__dialog" role="document" aria-labelledby="expenseTitle">
+          <header class="modal__header">
+            <h3 id="expenseTitle">Add Expense</h3>
+            <button class="modal__close" id="modalClose" aria-label="Close">✕</button>
+          </header>
+          <form class="modal__body" id="expenseForm">
+            <div class="form__grid">
+              <label class="form__field">
+                <span class="form__label">Name</span>
+                <input type="text" name="name" placeholder="e.g., Groceries" required />
+              </label>
+              <label class="form__field">
+                <span class="form__label">Enterprise / Place <span class="hint">(optional)</span></span>
+                <input type="text" name="place" placeholder="e.g., Local Market" />
+              </label>
+              <label class="form__field">
+                <span class="form__label">Amount</span>
+                <input type="number" name="amount" min="0" step="0.01" placeholder="e.g., 50.00" required />
+              </label>
+              <label class="form__field" id="paymentsField">
+                <span class="form__label">Payments <span class="hint">(required if credit)</span></span>
+                <input type="number" name="payments" min="1" step="1" placeholder="e.g., 5" />
+              </label>
+              <label class="form__field">
+                <span class="form__label">Date</span>
+                <input type="date" name="date" required />
+              </label>
+              <label class="form__field">
+                <span class="form__label">Payment Method</span>
+                <select name="method" id="method" required>
+                  <option value="cash">Cash</option>
+                  <option value="debit">Debit</option>
+                  <option value="credit">Credit</option>
+                </select>
+              </label>
+              <label class="form__field">
+                <span class="form__label">Category</span>
+                <select name="category" required>
+                  <option value="food">Food</option>
+                  <option value="transport">Transport</option>
+                  <option value="entertainment">Entertainment</option>
+                  <option value="bills">Bills</option>
+                  <option value="shopping">Shopping</option>
+                  <option value="other">Other</option>
+                </select>
+              </label>
+            </div>
+            <footer class="modal__footer">
+              <button type="button" class="btn" id="cancelExpense">Cancel</button>
+              <button type="submit" class="btn btn--primary">Save Expense</button>
+            </footer>
+          </form>
+        </div>
+      </div>
     </div>
+
     <script src="script.js"></script>
   </body>
-</html>
+  </html>
