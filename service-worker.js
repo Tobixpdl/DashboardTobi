@@ -1,6 +1,6 @@
 // Service Worker for Finance Dashboard PWA
 
-const CACHE_NAME = 'tobi-finance-v1';
+const CACHE_NAME = 'tobi-finance-v2';
 const urlsToCache = [
   './',
   './index.html',
