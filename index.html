@@ -10,19 +10,337 @@
     <meta name="apple-mobile-web-app-title" content="Finanzas" />
     <title>Tobi Finance Dashboard</title>
     
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="manifest.json" />
-    
-    <!-- Apple Touch Icons -->
-    <link rel="apple-touch-icon" href="icon-192.png" />
-    
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
     
-    <!-- Styles -->
-    <link rel="stylesheet" href="styles.css" />
+    <style>
+:root {
+  --bg: #f8fafc;
+  --bg-soft: #f3f6f9;
+  --card: #ffffff;
+  --text: #334155;
+  --muted: #6b7280;
+  --primary: #a7c7e7;
+  --primary-600: #8ab4dd;
+  --mint: #bfe3d0;
+  --beige: #f6ebd9;
+  --shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+  --radius: 16px;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  font-family: 'Poppins', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  color: var(--text);
+  background: linear-gradient(180deg, var(--bg) 0%, var(--bg-soft) 100%);
+}
+
+.app {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 0;
+}
+
+/* Sidebar */
+.sidebar {
+  background: var(--card);
+  border-right: 1px solid rgba(148, 163, 184, 0.22);
+  box-shadow: var(--shadow);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+.sidebar__inner { padding: 20px 16px; display: flex; flex-direction: column; height: 100%; }
+.sidebar__brand { display: flex; align-items: center; gap: 10px; padding: 8px 10px 16px; }
+.sidebar__logo { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 10px; background: var(--mint); box-shadow: var(--shadow); font-size: 18px; }
+.sidebar__name { font-weight: 600; letter-spacing: .2px; }
+
+.sidebar__nav { display: grid; gap: 6px; margin-top: 6px; }
+.nav__item {
+  appearance: none; background: transparent; color: var(--text); border: 0; text-align: left;
+  padding: 12px 12px; border-radius: 12px; display: flex; align-items: center; gap: 10px;
+  transition: transform .15s ease, background-color .15s ease, box-shadow .15s ease;
+  cursor: pointer;
+}
+.nav__item:hover { background: #f0f5fb; box-shadow: var(--shadow); transform: translateY(-1px); }
+.nav__item.is-active { background: #e8f1fb; color: #1f2a44; box-shadow: var(--shadow); }
+.nav__icon { display: inline-flex; color: #5a6b86; }
+.nav__label { font-weight: 500; }
+
+/* Main */
+.main { display: flex; flex-direction: column; min-width: 0; }
+
+.topbar {
+  position: sticky; top: 0; z-index: 5;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 14px 18px; background: rgba(255,255,255,0.7); backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(148,163,184,0.22);
+}
+.topbar__menu { display: none; flex-direction: column; gap: 4px; background: transparent; border: 0; padding: 8px; cursor: pointer; }
+.topbar__menu span { display: block; width: 22px; height: 2px; background: #6b7280; border-radius: 2px; }
+.topbar__greeting h1 { font-size: 1.125rem; margin: 0 0 2px; font-weight: 600; }
+.topbar__greeting p { margin: 0; color: var(--muted); font-size: .9rem; }
+.topbar__profile { display: flex; align-items: center; gap: 12px; }
+.avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--beige); display: grid; place-items: center; font-weight: 600; color: #5b4636; box-shadow: var(--shadow); }
+.topbar__action { display: none; }
+
+/* Cards / Stats */
+.stats {
+  display: grid; gap: 12px; padding: 16px; grid-template-columns: repeat(3, minmax(0,1fr));
+}
+.card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px; border: 1px solid rgba(148,163,184,.18); }
+.card--stat { display: grid; gap: 10px; }
+.card__label { color: var(--muted); font-weight: 500; }
+.card__value { font-size: 1.6rem; font-weight: 600; letter-spacing: .2px; }
+
+/* Content Views */
+.view { display: none; padding: 16px; }
+.view.is-active { display: block; }
+
+/* Overview */
+.overview h2 { font-size: 1.05rem; margin: 6px 0 12px; color: #465a72; }
+
+/* Expenses View */
+.expenses-filters {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  padding: 16px;
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 180px;
+}
+
+.filter-group label {
+  font-size: 0.85rem;
+  color: #567;
+  font-weight: 500;
+}
+
+.filter-group select {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(148,163,184,.35);
+  background: #fbfcfe;
+  color: var(--text);
+  outline: none;
+  cursor: pointer;
+}
+
+.expenses-list {
+  display: grid;
+  gap: 12px;
+}
+
+.expense-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 18px;
+  border: 1px solid rgba(148,163,184,.18);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.expense-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.expense-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.expense-name {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text);
+}
+
+.expense-badge {
+  font-size: 0.75rem;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-weight: 500;
+  color: #1f2a44;
+}
+
+.expense-details {
+  color: var(--muted);
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.expense-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.expense-amount {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #1f2a44;
+}
+
+.delete-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  opacity: 0.6;
+  transition: opacity 0.15s ease;
+  padding: 4px;
+}
+
+.delete-btn:hover {
+  opacity: 1;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--muted);
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.empty-state-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+/* Buttons */
+.btn { 
+  appearance: none; border: 0; padding: 10px 14px; border-radius: 12px; 
+  background: #eef2f6; color: #344255; font-weight: 500; box-shadow: var(--shadow); 
+  cursor: pointer; transition: transform .15s ease, box-shadow .15s ease, background-color .15s ease; 
+}
+.btn:hover { transform: translateY(-1px); box-shadow: 0 12px 24px rgba(15,23,42,.08); }
+.btn:active { transform: translateY(0); }
+.btn--primary { background: var(--primary); color: #1f2a44; }
+.btn--primary:hover { background: var(--primary-600); }
+
+.fab {
+  position: fixed; right: 16px; bottom: 16px; z-index: 10;
+  width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; 
+  font-size: 24px; font-weight: 600;
+  box-shadow: 0 14px 30px rgba(71, 103, 151, 0.25);
+}
+
+/* Modal */
+.modal { position: fixed; inset: 0; display: none; z-index: 100; }
+.modal.is-open { display: block; }
+.modal__backdrop { position: absolute; inset: 0; background: rgba(15,23,42,.35); opacity: 0; transition: opacity .18s ease; }
+.modal.is-open .modal__backdrop { opacity: 1; }
+.modal__dialog { 
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -44%) scale(.96); 
+  width: min(720px, 92vw); background: var(--card); border-radius: 16px; 
+  border: 1px solid rgba(148,163,184,.2); box-shadow: 0 24px 60px rgba(31,42,68,.18); 
+  opacity: 0; transition: transform .18s ease, opacity .18s ease; 
+  max-height: 90vh;
+  overflow-y: auto;
+}
+.modal.is-open .modal__dialog { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+.modal__header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid rgba(148,163,184,.18); }
+.modal__header h3 { margin: 0; font-size: 1.05rem; }
+.modal__close { background: transparent; border: 0; font-size: 20px; padding: 6px 8px; cursor: pointer; color: var(--muted); }
+.modal__body { padding: 14px 16px; }
+.modal__footer { display: flex; justify-content: flex-end; gap: 10px; padding: 0 16px 16px; }
+
+/* Form */
+.form__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form__field { display: grid; gap: 6px; }
+.form__label { font-size: .85rem; color: #567; font-weight: 500; }
+.hint { color: var(--muted); font-weight: 400; }
+.form__field input, .form__field select {
+  width: 100%; padding: 12px 12px; border-radius: 12px; border: 1px solid rgba(148,163,184,.35);
+  background: #fbfcfe; color: var(--text); outline: none; transition: border-color .15s ease, box-shadow .15s ease;
+}
+.form__field input:focus, .form__field select:focus { 
+  border-color: var(--primary-600); box-shadow: 0 0 0 3px rgba(138,180,221,.25); 
+}
+
+.form__checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.form__checkbox input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: var(--primary);
+}
+
+.form__checkbox label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .stats { grid-template-columns: repeat(3, minmax(0,1fr)); }
+}
+
+@media (max-width: 860px) {
+  .app { grid-template-columns: 1fr; }
+  .sidebar { 
+    position: fixed; left: 0; top: 0; height: 100vh; width: 78%; max-width: 320px; 
+    transform: translateX(-105%); transition: transform .2s ease; border-right: 0; 
+    box-shadow: 0 0 0 rgba(0,0,0,0); z-index: 20; 
+  }
+  .sidebar--open { transform: translateX(0); box-shadow: 0 20px 50px rgba(31,42,68,.25); }
+  .topbar__menu { display: inline-flex; }
+  .topbar__action { display: none; }
+  .stats { grid-template-columns: 1fr; }
+  .expenses-filters { flex-direction: column; }
+  .filter-group { min-width: 100%; }
+}
+
+@media (min-width: 861px) {
+  .topbar__action { display: inline-flex; }
+}
+
+@media (max-width: 560px) {
+  .form__grid { grid-template-columns: 1fr; }
+  .expense-card { grid-template-columns: 1fr; }
+  .expense-actions { justify-content: space-between; width: 100%; }
+}
+    </style>
   </head>
   <body>
     <div class="app">
@@ -34,31 +352,19 @@
             <span class="sidebar__name">Tobi Finance</span>
           </div>
           <nav class="sidebar__nav">
-            <button class="nav__item is-active" aria-current="page">
+            <button class="nav__item is-active" data-view="overview">
               <span class="nav__icon" aria-hidden="true">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 10.5L12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-10.5Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </span>
               <span class="nav__label">Overview</span>
             </button>
-            <button class="nav__item">
+            <button class="nav__item" data-view="expenses">
               <span class="nav__icon" aria-hidden="true">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 6h16M4 12h16M4 18h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
               </span>
               <span class="nav__label">Expenses</span>
             </button>
-            <button class="nav__item">
-              <span class="nav__icon" aria-hidden="true">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 12l4 4 8-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </span>
-              <span class="nav__label">Income</span>
-            </button>
-            <button class="nav__item">
-              <span class="nav__icon" aria-hidden="true">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2v20M6 8l6-6 6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </span>
-              <span class="nav__label">Goals</span>
-            </button>
-            <button class="nav__item">
+            <button class="nav__item" data-view="settings">
               <span class="nav__icon" aria-hidden="true">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" stroke="currentColor" stroke-width="1.5"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09c0-.67-.39-1.28-1-1.51a1.65 1.65 0 0 0-1.82.33l-.06.06A2 2 0 1 1 4.4 19.4l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09c.67 0 1.28-.39 1.51-1a1.65 1.65 0 0 0-.33-1.82l-.06-.06A2 2 0 1 1 4.4 4.6l.06.06c.49.49 1.2.64 1.82.33.61-.23 1-.84 1-1.51V3a2 2 0 1 1 4 0v.09c0 .67.39 1.28 1 1.51.62.31 1.33.16 1.82-.33l.06-.06A2 2 0 1 1 19.4 4.6l-.06.06c-.49.49-.64 1.2-.33 1.82.23.61.84 1 1.51 1H21a2 2 0 1 1 0 4h-.09c-.67 0-1.28.39-1.51 1Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
               </span>
@@ -89,20 +395,50 @@
         <section class="stats">
           <article class="card card--stat">
             <div class="card__label">Total Balance</div>
-            <div class="card__value">$12,450</div>
+            <div class="card__value" id="totalBalanceValue">$12,450</div>
           </article>
           <article class="card card--stat">
             <div class="card__label">Monthly Expenses</div>
-            <div class="card__value">$1,820</div>
+            <div class="card__value" id="monthlyExpensesValue">$0</div>
+            <div id="expensesByPerson" style="margin-top: 12px; font-size: 0.75rem; color: var(--muted); display: flex; flex-direction: column; gap: 4px;"></div>
           </article>
           <article class="card card--stat">
             <div class="card__label">Savings Rate</div>
-            <div class="card__value">22%</div>
+            <div class="card__value" id="savingsRateValue">0%</div>
           </article>
         </section>
 
-       <!-- Financial Overview -->
-        <section class="overview">
+        <!-- Overview View -->
+        <section class="view is-active" id="overviewView">
+          <div id="categoryChartContainer"></div>
+        </section>
+
+        <!-- Expenses View -->
+        <section class="view" id="expensesView">
+          <div class="expenses-filters">
+            <div class="filter-group">
+              <label for="filterMonth">Month</label>
+              <select id="filterMonth">
+                <option value="all">All Months</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label for="filterCategory">Category</label>
+              <select id="filterCategory">
+                <option value="all">All Categories</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label for="filterMethod">Payment Method</label>
+              <select id="filterMethod">
+                <option value="all">All Methods</option>
+                <option value="cash">Cash</option>
+                <option value="debit">Debit</option>
+                <option value="credit">Credit</option>
+              </select>
+            </div>
+          </div>
+          <div class="expenses-list" id="expensesList"></div>
         </section>
       </div>
 
@@ -117,57 +453,1083 @@
             <h3 id="expenseTitle">Add Expense</h3>
             <button class="modal__close" id="modalClose" aria-label="Close">✕</button>
           </header>
-          <form class="modal__body" id="expenseForm">
-            <div class="form__grid">
-              <label class="form__field">
-                <span class="form__label">Name</span>
-                <input type="text" name="name" placeholder="e.g., Groceries" required />
-              </label>
-              <label class="form__field">
-                <span class="form__label">Enterprise / Place <span class="hint">(optional)</span></span>
-                <input type="text" name="place" placeholder="e.g., Local Market" />
-              </label>
-              <label class="form__field">
-                <span class="form__label">Amount</span>
-                <input type="number" name="amount" min="0" step="0.01" placeholder="e.g., 50.00" required />
-              </label>
-              <label class="form__field" id="paymentsField">
-                <span class="form__label">Payments <span class="hint">(required if credit)</span></span>
-                <input type="number" name="payments" min="1" step="1" placeholder="e.g., 5" />
-              </label>
-              <label class="form__field">
-                <span class="form__label">Date</span>
-                <input type="date" name="date" required />
-              </label>
-              <label class="form__field">
-                <span class="form__label">Payment Method</span>
-                <select name="method" id="method" required>
-                  <option value="cash">Cash</option>
-                  <option value="debit">Debit</option>
-                  <option value="credit">Credit</option>
-                </select>
-              </label>
-              <label class="form__field">
-                <span class="form__label">Category</span>
-                <select name="category" required>
-                  <option value="food">Food</option>
-                  <option value="transport">Transport</option>
-                  <option value="entertainment">Entertainment</option>
-                  <option value="bills">Bills</option>
-                  <option value="shopping">Shopping</option>
-                  <option value="other">Other</option>
-                </select>
-              </label>
-            </div>
-            <footer class="modal__footer">
-              <button type="button" class="btn" id="cancelExpense">Cancel</button>
-              <button type="submit" class="btn btn--primary">Save Expense</button>
-            </footer>
-          </form>
+          <div class="modal__body">
+            <form id="expenseForm">
+              <div class="form__grid">
+                <label class="form__field">
+                  <span class="form__label">Name</span>
+                  <input type="text" name="name" placeholder="e.g., Groceries" required />
+                </label>
+                <label class="form__field">
+                  <span class="form__label">Enterprise / Place <span class="hint">(optional)</span></span>
+                  <input type="text" name="place" placeholder="e.g., Local Market" />
+                </label>
+                <label class="form__field">
+                  <span class="form__label">Amount</span>
+                  <input type="number" name="amount" min="0" step="0.01" placeholder="e.g., 50.00" required />
+                </label>
+                <label class="form__field" id="paymentsField">
+                  <span class="form__label">Payments <span class="hint">(required if credit)</span></span>
+                  <input type="number" name="payments" min="1" step="1" placeholder="e.g., 5" />
+                </label>
+                <label class="form__field">
+                  <span class="form__label">Date</span>
+                  <input type="date" name="date" required />
+                </label>
+                <label class="form__field">
+                  <span class="form__label">Payment Method</span>
+                  <select name="method" id="method" required>
+                    <option value="cash">Cash</option>
+                    <option value="debit">Debit</option>
+                    <option value="credit">Credit</option>
+                  </select>
+                </label>
+                <label class="form__field">
+                  <span class="form__label">Category</span>
+                  <select name="category" id="categorySelect" required>
+                  </select>
+                </label>
+                <label class="form__field">
+                  <span class="form__label">Who Pays</span>
+                  <select name="whoPays" id="whoPaysSelect" required>
+                  </select>
+                </label>
+                <div class="form__checkbox">
+                  <input type="checkbox" name="isMonthly" id="isMonthly" />
+                  <label for="isMonthly">Monthly recurring payment</label>
+                </div>
+              </div>
+              <footer class="modal__footer">
+                <button type="button" class="btn" id="cancelExpense">Cancel</button>
+                <button type="submit" class="btn btn--primary">Save Expense</button>
+              </footer>
+            </form>
+          </div>
         </div>
       </div>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+// State Management
+let expenses = [];
+let totalBalance = 12450;
+let currentMonth = new Date().getMonth();
+let currentYear = new Date().getFullYear();
+let payers = [
+  { id: 'tobi', name: 'Tobi' },
+  { id: 'mica', name: 'Mica' }
+];
+let categories = [
+  { name: 'food', label: 'Food', color: '#bfe3d0' },
+  { name: 'transport', label: 'Transport', color: '#a7c7e7' },
+  { name: 'entertainment', label: 'Entertainment', color: '#f6c3d3' },
+  { name: 'bills', label: 'Bills', color: '#f6ebd9' },
+  { name: 'shopping', label: 'Shopping', color: '#e8d5f2' },
+  { name: 'other', label: 'Other', color: '#e5e7eb' }
+];
+
+let currentView = 'overview';
+let editingExpenseId = null;
+let filters = {
+  month: 'all',
+  category: 'all',
+  method: 'all'
+};
+
+// DOM Elements
+const sidebar = document.getElementById('sidebar');
+const menuToggle = document.getElementById('menuToggle');
+const expenseModal = document.getElementById('expenseModal');
+const modalBackdrop = document.getElementById('modalBackdrop');
+const modalClose = document.getElementById('modalClose');
+const addExpenseTop = document.getElementById('addExpenseTop');
+const addExpenseFab = document.getElementById('addExpenseFab');
+const cancelExpense = document.getElementById('cancelExpense');
+const expenseForm = document.getElementById('expenseForm');
+const methodSelect = document.getElementById('method');
+const paymentsField = document.getElementById('paymentsField');
+const categorySelect = document.getElementById('categorySelect');
+
+// Initialize App
+document.addEventListener('DOMContentLoaded', () => {
+  loadData();
+  updateCategoryOptions();
+  updateWhoPaysOptions();  // ← AGREGAR ESTA LÍNEA
+  updateMonthFilter();
+  updateCategoryFilter();
+  updateUI();
+  attachEventListeners();
+}); 
+
+// Event Listeners
+function attachEventListeners() {
+  // Menu toggle
+  menuToggle?.addEventListener('click', () => {
+    sidebar.classList.toggle('sidebar--open');
+  });
+
+  // Close sidebar when clicking outside
+  document.addEventListener('click', (e) => {
+    if (sidebar.classList.contains('sidebar--open') && 
+        !sidebar.contains(e.target) && 
+        !menuToggle.contains(e.target)) {
+      sidebar.classList.remove('sidebar--open');
+    }
+  });
+
+  // Navigation
+  document.querySelectorAll('.nav__item').forEach(item => {
+    item.addEventListener('click', (e) => {
+      const view = item.dataset.view;
+      if (view === 'settings') {
+        openSettingsModal();
+      } else {
+        switchView(view);
+      }
+    });
+  });
+
+  // Modal
+  addExpenseTop?.addEventListener('click', openModal);
+  addExpenseFab?.addEventListener('click', openModal);
+  modalClose?.addEventListener('click', closeModal);
+  cancelExpense?.addEventListener('click', closeModal);
+  modalBackdrop?.addEventListener('click', closeModal);
+
+  // Form
+  expenseForm?.addEventListener('submit', handleExpenseSubmit);
+  methodSelect?.addEventListener('change', handleMethodChange);
+
+  // Filters
+  document.getElementById('filterMonth')?.addEventListener('change', (e) => {
+    filters.month = e.target.value;
+    renderExpensesList();
+  });
+
+  document.getElementById('filterCategory')?.addEventListener('change', (e) => {
+    filters.category = e.target.value;
+    renderExpensesList();
+  });
+
+  document.getElementById('filterMethod')?.addEventListener('change', (e) => {
+    filters.method = e.target.value;
+    renderExpensesList();
+  });
+}
+
+// View Management
+function switchView(viewName) {
+  currentView = viewName;
+  
+  // Update nav items
+  document.querySelectorAll('.nav__item').forEach(item => {
+    item.classList.remove('is-active');
+    if (item.dataset.view === viewName) {
+      item.classList.add('is-active');
+    }
+  });
+
+  // Update views
+  document.querySelectorAll('.view').forEach(view => {
+    view.classList.remove('is-active');
+  });
+  
+  const activeView = document.getElementById(`${viewName}View`);
+  if (activeView) {
+    activeView.classList.add('is-active');
+    
+    if (viewName === 'expenses') {
+      renderExpensesList();
+    }
+  }
+
+  // Close sidebar on mobile
+  sidebar.classList.remove('sidebar--open');
+}
+
+// Modal Functions
+function openModal(expenseId = null) {
+  editingExpenseId = expenseId;
+  
+  expenseModal.classList.add('is-open');
+  expenseModal.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+  
+  // Update modal title
+  const modalTitle = document.getElementById('expenseTitle');
+  modalTitle.textContent = editingExpenseId ? 'Edit Expense' : 'Add Expense';
+  
+  // Update submit button text
+  const submitBtn = expenseForm.querySelector('button[type="submit"]');
+  submitBtn.textContent = editingExpenseId ? 'Update Expense' : 'Save Expense';
+  
+  if (editingExpenseId) {
+    // Load expense data for editing
+    const expense = expenses.find(e => e.id === editingExpenseId);
+    if (expense) {
+      expenseForm.querySelector('input[name="name"]').value = expense.name;
+      expenseForm.querySelector('input[name="place"]').value = expense.place || '';
+      expenseForm.querySelector('input[name="amount"]').value = expense.amount;
+      expenseForm.querySelector('select[name="category"]').value = expense.category;
+      expenseForm.querySelector('input[name="isMonthly"]').checked = expense.isMonthly || false;
+      
+      // Disable fields that can't be edited
+      expenseForm.querySelector('input[name="date"]').value = expense.date;
+      expenseForm.querySelector('input[name="date"]').disabled = true;
+      expenseForm.querySelector('select[name="method"]').value = expense.method;
+      expenseForm.querySelector('select[name="method"]').disabled = true;
+      expenseForm.querySelector('input[name="payments"]').value = expense.payments || '';
+      expenseForm.querySelector('input[name="payments"]').disabled = true;
+      
+      handleMethodChange();
+    }
+  } else {
+    // New expense - enable all fields
+    expenseForm.querySelector('input[name="date"]').disabled = false;
+    expenseForm.querySelector('select[name="method"]').disabled = false;
+    expenseForm.querySelector('input[name="payments"]').disabled = false;
+    
+    // Set today's date as default
+    const dateInput = expenseForm.querySelector('input[name="date"]');
+    if (dateInput && !dateInput.value) {
+      dateInput.value = new Date().toISOString().split('T')[0];
+    }
+  }
+}
+
+function closeModal() {
+  expenseModal.classList.remove('is-open');
+  expenseModal.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+  expenseForm.reset();
+  editingExpenseId = null;
+  
+  // Re-enable all fields
+  expenseForm.querySelector('input[name="date"]').disabled = false;
+  expenseForm.querySelector('select[name="method"]').disabled = false;
+  expenseForm.querySelector('input[name="payments"]').disabled = false;
+}
+
+function handleMethodChange() {
+  const paymentsInput = paymentsField.querySelector('input');
+  if (methodSelect.value === 'credit') {
+    paymentsField.style.opacity = '1';
+    paymentsInput.required = true;
+  } else {
+    paymentsField.style.opacity = '0.5';
+    paymentsInput.required = false;
+    paymentsInput.value = '';
+  }
+}
+
+// Expense Management
+function handleExpenseSubmit(e) {
+  e.preventDefault();
+  
+  const formData = new FormData(expenseForm);
+  const expense = {
+    id: Date.now(),
+    name: formData.get('name'),
+    place: formData.get('place') || '',
+    amount: parseFloat(formData.get('amount')),
+    payments: parseInt(formData.get('payments')) || 1,
+    date: formData.get('date'),
+    method: formData.get('method'),
+    category: formData.get('category'),
+    whoPays: formData.get('whoPays'),  // ← AGREGAR ESTA LÍNEA
+    isMonthly: formData.get('isMonthly') === 'on',
+    createdAt: new Date().toISOString()
+  };
+
+  expenses.push(expense);
+  saveData();
+  updateUI();
+  closeModal();
+}
+
+function deleteExpense(id) {
+  if (confirm('Are you sure you want to delete this expense?')) {
+    expenses = expenses.filter(exp => exp.id !== id);
+    saveData();
+    updateUI();
+  }
+}
+
+// Calculate monthly expenses
+function calculateMonthlyExpenses() {
+  let total = 0;
+  
+  expenses.forEach(expense => {
+    const expenseDate = new Date(expense.date);
+    const expenseMonth = expenseDate.getMonth();
+    const expenseYear = expenseDate.getFullYear();
+    
+    // Monthly recurring payments
+    if (expense.isMonthly) {
+      const startDate = new Date(expenseYear, expenseMonth, 1);
+      const currentDate = new Date(currentYear, currentMonth, 1);
+      
+      // Only include if the expense started before or during current month
+      if (startDate <= currentDate) {
+        total += expense.amount;
+      }
+    }
+    // Credit with multiple payments
+    else if (expense.method === 'credit' && expense.payments > 1) {
+      const monthsDiff = (currentYear - expenseYear) * 12 + (currentMonth - expenseMonth);
+      
+      if (monthsDiff >= 0 && monthsDiff < expense.payments) {
+        total += expense.amount / expense.payments;
+      }
+    }
+    // One-time payments
+    else {
+      if (expenseMonth === currentMonth && expenseYear === currentYear) {
+        total += expense.amount;
+      }
+    }
+  });
+  
+  return total;
+}
+
+// Calculate expenses by category
+function calculateCategoryExpenses() {
+  const categoryTotals = {};
+  
+  categories.forEach(cat => {
+    categoryTotals[cat.name] = 0;
+  });
+  
+  expenses.forEach(expense => {
+    const expenseDate = new Date(expense.date);
+    const expenseMonth = expenseDate.getMonth();
+    const expenseYear = expenseDate.getFullYear();
+    
+    // Monthly recurring
+    if (expense.isMonthly) {
+      const startDate = new Date(expense.date);
+      const checkDate = new Date(currentYear, currentMonth, 1);
+      
+      if (startDate <= checkDate) {
+        categoryTotals[expense.category] = (categoryTotals[expense.category] || 0) + expense.amount;
+      }
+    }
+    // Credit with payments
+    else if (expense.method === 'credit' && expense.payments > 1) {
+      const monthsDiff = (currentYear - expenseYear) * 12 + (currentMonth - expenseMonth);
+      
+      if (monthsDiff >= 0 && monthsDiff < expense.payments) {
+        const monthlyAmount = expense.amount / expense.payments;
+        categoryTotals[expense.category] = (categoryTotals[expense.category] || 0) + monthlyAmount;
+      }
+    }
+    // One-time
+    else {
+      if (expenseMonth === currentMonth && expenseYear === currentYear) {
+        categoryTotals[expense.category] = (categoryTotals[expense.category] || 0) + expense.amount;
+      }
+    }
+  });
+  
+  return categoryTotals;
+}
+
+function calculateSavingsRate() {
+  const monthlyExpenses = calculateMonthlyExpenses();
+  const estimatedMonthlyIncome = totalBalance / 6;
+  
+  if (estimatedMonthlyIncome === 0) return 0;
+  
+  const savings = estimatedMonthlyIncome - monthlyExpenses;
+  const rate = (savings / estimatedMonthlyIncome) * 100;
+  
+  return Math.max(0, Math.min(100, rate));
+}
+
+function calculateExpensesByPerson() {
+  const personTotals = {};
+  
+  // Initialize all payers with 0
+  payers.forEach(payer => {
+    personTotals[payer.id] = 0;
+  });
+  
+  expenses.forEach(expense => {
+    const expenseDate = new Date(expense.date);
+    const expenseMonth = expenseDate.getMonth();
+    const expenseYear = expenseDate.getFullYear();
+    const whoPays = expense.whoPays || 'tobi'; // Default to tobi if not set
+    
+    // Monthly recurring
+    if (expense.isMonthly) {
+      const startDate = new Date(expense.date);
+      const checkDate = new Date(currentYear, currentMonth, 1);
+      
+      if (startDate <= checkDate) {
+        personTotals[whoPays] = (personTotals[whoPays] || 0) + expense.amount;
+      }
+    }
+    // Credit with payments
+    else if (expense.method === 'credit' && expense.payments > 1) {
+      const monthsDiff = (currentYear - expenseYear) * 12 + (currentMonth - expenseMonth);
+      
+      if (monthsDiff >= 0 && monthsDiff < expense.payments) {
+        const monthlyAmount = expense.amount / expense.payments;
+        personTotals[whoPays] = (personTotals[whoPays] || 0) + monthlyAmount;
+      }
+    }
+    // One-time
+    else {
+      if (expenseMonth === currentMonth && expenseYear === currentYear) {
+        personTotals[whoPays] = (personTotals[whoPays] || 0) + expense.amount;
+      }
+    }
+  });
+  
+  return personTotals;
+}
+
+// UI Updates
+function updateUI() {
+  // Update stats
+  document.getElementById('totalBalanceValue').textContent = 
+    `${totalBalance.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+  
+  const monthlyExpenses = calculateMonthlyExpenses();
+  document.getElementById('monthlyExpensesValue').textContent = 
+    `${monthlyExpenses.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+  
+  // Calculate and show expenses by person
+  const expensesByPerson = calculateExpensesByPerson();
+  const expensesByPersonContainer = document.getElementById('expensesByPerson');
+  if (expensesByPersonContainer) {
+    expensesByPersonContainer.innerHTML = '';
+    payers.forEach(payer => {
+      const amount = expensesByPerson[payer.id] || 0;
+      const div = document.createElement('div');
+      div.style.display = 'flex';
+      div.style.justifyContent = 'space-between';
+      div.innerHTML = `
+        <span style="font-weight: 500;">${payer.name}:</span>
+        <span style="font-weight: 600;">$${amount.toFixed(0)}</span>
+      `;
+      expensesByPersonContainer.appendChild(div);
+    });
+  }
+  
+  const savingsRate = calculateSavingsRate();
+  document.getElementById('savingsRateValue').textContent = 
+    `${savingsRate.toFixed(0)}%`;
+  
+  renderCategoryChart();
+  if (currentView === 'expenses') {
+    renderExpensesList();
+  }
+}
+
+// Render Category Chart
+function renderCategoryChart() {
+  const container = document.getElementById('categoryChartContainer');
+  container.innerHTML = '';
+  
+  const categoryTotals = calculateCategoryExpenses();
+  const totalExpenses = Object.values(categoryTotals).reduce((sum, val) => sum + val, 0);
+  
+  if (totalExpenses === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">📊</div>
+        <p>No expenses this month. Add your first expense to see the breakdown!</p>
+      </div>
+    `;
+    return;
+  }
+  
+  const chartSection = document.createElement('div');
+  chartSection.style.marginTop = '8px';
+  
+  const header = document.createElement('h2');
+  header.textContent = 'Expenses by Category';
+  header.style.fontSize = '1.05rem';
+  header.style.margin = '0 0 12px';
+  header.style.color = '#465a72';
+  
+  chartSection.appendChild(header);
+  
+  const chartCard = document.createElement('div');
+  chartCard.className = 'card';
+  chartCard.style.padding = '20px';
+  
+  categories.forEach(category => {
+    const amount = categoryTotals[category.name] || 0;
+    if (amount === 0) return;
+    
+    const percentage = (amount / totalExpenses) * 100;
+    
+    const barContainer = document.createElement('div');
+    barContainer.style.marginBottom = '16px';
+    
+    const labelRow = document.createElement('div');
+    labelRow.style.display = 'flex';
+    labelRow.style.justifyContent = 'space-between';
+    labelRow.style.marginBottom = '6px';
+    labelRow.style.fontSize = '0.9rem';
+    
+    const label = document.createElement('span');
+    label.style.fontWeight = '500';
+    label.style.color = '#334155';
+    label.textContent = category.label;
+    
+    const amountLabel = document.createElement('span');
+    amountLabel.style.fontWeight = '600';
+    amountLabel.style.color = '#1f2a44';
+    amountLabel.textContent = `${amount.toFixed(2)} (${percentage.toFixed(1)}%)`;
+    
+    labelRow.appendChild(label);
+    labelRow.appendChild(amountLabel);
+    
+    const barTrack = document.createElement('div');
+    barTrack.style.width = '100%';
+    barTrack.style.height = '24px';
+    barTrack.style.background = '#f0f4f8';
+    barTrack.style.borderRadius = '12px';
+    barTrack.style.overflow = 'hidden';
+    barTrack.style.boxShadow = 'inset 0 1px 3px rgba(0,0,0,0.1)';
+    
+    const barFill = document.createElement('div');
+    barFill.style.width = `${percentage}%`;
+    barFill.style.height = '100%';
+    barFill.style.background = category.color;
+    barFill.style.borderRadius = '12px';
+    barFill.style.transition = 'width 0.5s ease';
+    barFill.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+    
+    barTrack.appendChild(barFill);
+    barContainer.appendChild(labelRow);
+    barContainer.appendChild(barTrack);
+    chartCard.appendChild(barContainer);
+  });
+  
+  chartSection.appendChild(chartCard);
+  container.appendChild(chartSection);
+}
+
+// Render Expenses List with Filters
+function renderExpensesList() {
+  const container = document.getElementById('expensesList');
+  container.innerHTML = '';
+  
+  // Filter expenses
+  let filteredExpenses = expenses.filter(expense => {
+    const expenseDate = new Date(expense.date);
+    const expenseMonth = expenseDate.getMonth();
+    const expenseYear = expenseDate.getFullYear();
+    
+    // Month filter
+    if (filters.month !== 'all') {
+      const [filterYear, filterMonth] = filters.month.split('-').map(Number);
+      if (expenseMonth !== filterMonth || expenseYear !== filterYear) {
+        return false;
+      }
+    }
+    
+    // Category filter
+    if (filters.category !== 'all' && expense.category !== filters.category) {
+      return false;
+    }
+    
+    // Method filter
+    if (filters.method !== 'all' && expense.method !== filters.method) {
+      return false;
+    }
+    
+    return true;
+  });
+  
+  if (filteredExpenses.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">🔍</div>
+        <p>No expenses found with the selected filters.</p>
+      </div>
+    `;
+    return;
+  }
+  
+  // Sort by date (most recent first)
+  filteredExpenses.sort((a, b) => new Date(b.date) - new Date(a.date));
+  
+  filteredExpenses.forEach(expense => {
+    const card = createExpenseCard(expense);
+    container.appendChild(card);
+  });
+}
+
+function createExpenseCard(expense) {
+  const card = document.createElement('div');
+  card.className = 'expense-card';
+  
+  const info = document.createElement('div');
+  info.className = 'expense-info';
+  
+  const header = document.createElement('div');
+  header.className = 'expense-header';
+  
+  const name = document.createElement('div');
+  name.className = 'expense-name';
+  name.textContent = expense.name;
+  
+  const categoryBadge = document.createElement('span');
+  categoryBadge.className = 'expense-badge';
+  const categoryObj = categories.find(cat => cat.name === expense.category);
+  categoryBadge.style.background = categoryObj ? categoryObj.color : '#e5e7eb';
+  categoryBadge.textContent = categoryObj ? categoryObj.label : expense.category;
+  
+  header.appendChild(name);
+  header.appendChild(categoryBadge);
+  
+  // Add monthly badge if applicable
+  if (expense.isMonthly) {
+    const monthlyBadge = document.createElement('span');
+    monthlyBadge.className = 'expense-badge';
+    monthlyBadge.style.background = '#fef3c7';
+    monthlyBadge.textContent = '🔄 Monthly';
+    header.appendChild(monthlyBadge);
+  }
+  
+  const details = document.createElement('div');
+  details.className = 'expense-details';
+  
+  let detailsText = '';
+  if (expense.place) detailsText += expense.place + ' • ';
+  detailsText += expense.method;
+  if (expense.method === 'credit' && expense.payments > 1) {
+    detailsText += ` (${expense.payments} payments)`;
+  }
+  detailsText += ' • ' + formatDate(expense.date);
+  
+  details.textContent = detailsText;
+  
+  info.appendChild(header);
+  info.appendChild(details);
+  
+  const actions = document.createElement('div');
+  actions.className = 'expense-actions';
+  
+  const amount = document.createElement('div');
+  amount.className = 'expense-amount';
+  amount.textContent = `${expense.amount.toFixed(2)}`;
+  
+  const deleteBtn = document.createElement('button');
+  deleteBtn.className = 'delete-btn';
+  deleteBtn.textContent = '🗑️';
+  deleteBtn.onclick = () => deleteExpense(expense.id);
+  deleteBtn.setAttribute('aria-label', 'Delete expense');
+  
+  actions.appendChild(amount);
+  actions.appendChild(deleteBtn);
+  
+  card.appendChild(info);
+  card.appendChild(actions);
+  
+  return card;
+}
+
+function formatDate(dateString) {
+  const date = new Date(dateString);
+  const options = { month: 'short', day: 'numeric', year: 'numeric' };
+  return date.toLocaleDateString('en-US', options);
+}
+
+// Update filter dropdowns
+function updateMonthFilter() {
+  const select = document.getElementById('filterMonth');
+  if (!select) return;
+  
+  const months = new Set();
+  expenses.forEach(expense => {
+    const date = new Date(expense.date);
+    const monthKey = `${date.getFullYear()}-${date.getMonth()}`;
+    months.add(monthKey);
+  });
+  
+  const sortedMonths = Array.from(months).sort().reverse();
+  
+  select.innerHTML = '<option value="all">All Months</option>';
+  sortedMonths.forEach(monthKey => {
+    const [year, month] = monthKey.split('-').map(Number);
+    const date = new Date(year, month, 1);
+    const option = document.createElement('option');
+    option.value = monthKey;
+    option.textContent = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    select.appendChild(option);
+  });
+}
+
+function updateCategoryFilter() {
+  const select = document.getElementById('filterCategory');
+  if (!select) return;
+  
+  select.innerHTML = '<option value="all">All Categories</option>';
+  categories.forEach(cat => {
+    const option = document.createElement('option');
+    option.value = cat.name;
+    option.textContent = cat.label;
+    select.appendChild(option);
+  });
+}
+
+function updateCategoryOptions() {
+  categorySelect.innerHTML = '';
+  categories.forEach(cat => {
+    const option = document.createElement('option');
+    option.value = cat.name;
+    option.textContent = cat.label;
+    categorySelect.appendChild(option);
+  });
+}
+
+function updateWhoPaysOptions() {
+  const whoPaysSelect = document.getElementById('whoPaysSelect');
+  if (!whoPaysSelect) return;
+  
+  whoPaysSelect.innerHTML = '';
+  payers.forEach(payer => {
+    const option = document.createElement('option');
+    option.value = payer.id;
+    option.textContent = payer.name;
+    whoPaysSelect.appendChild(option);
+  });
+}
+
+// Settings Modal
+// Settings Modal
+function openSettingsModal() {
+  const settingsModal = document.createElement('div');
+  settingsModal.className = 'modal is-open';
+  settingsModal.id = 'settingsModal';
+  
+  // Generate categories HTML
+  let categoriesHTML = '';
+  categories.forEach((cat, index) => {
+    categoriesHTML += `
+      <div class="category-item" style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; padding: 10px; background: #f8fafc; border-radius: 8px;">
+        <input 
+          type="color" 
+          value="${cat.color}" 
+          data-category-index="${index}"
+          class="category-color"
+          style="width: 40px; height: 40px; border: none; border-radius: 6px; cursor: pointer;"
+        />
+        <input 
+          type="text" 
+          value="${cat.label}" 
+          data-category-index="${index}"
+          class="category-label"
+          style="flex: 1; padding: 8px 12px; border: 1px solid rgba(148,163,184,.35); border-radius: 8px; background: white;"
+        />
+        <button 
+          type="button" 
+          class="delete-category"
+          data-category-index="${index}"
+          style="background: #fee; color: #c00; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: 500;"
+        >Delete</button>
+      </div>
+    `;
+  });
+  
+  // Generate payers HTML
+  let payersHTML = '';
+  payers.forEach((payer, index) => {
+    payersHTML += `
+      <div class="payer-item" style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; padding: 10px; background: #f8fafc; border-radius: 8px;">
+        <input 
+          type="text" 
+          value="${payer.name}" 
+          data-payer-index="${index}"
+          class="payer-name"
+          style="flex: 1; padding: 8px 12px; border: 1px solid rgba(148,163,184,.35); border-radius: 8px; background: white;"
+        />
+        <button 
+          type="button" 
+          class="delete-payer"
+          data-payer-index="${index}"
+          style="background: #fee; color: #c00; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: 500;"
+        >Delete</button>
+      </div>
+    `;
+  });
+  
+  settingsModal.innerHTML = `
+    <div class="modal__backdrop"></div>
+    <div class="modal__dialog">
+      <header class="modal__header">
+        <h3>Settings</h3>
+        <button class="modal__close" id="settingsClose">✕</button>
+      </header>
+      <div class="modal__body">
+        <form id="settingsForm">
+          <div class="form__field" style="margin-bottom: 24px;">
+            <label class="form__label" for="totalBalanceInput">Total Balance ($)</label>
+            <input 
+              type="number" 
+              id="totalBalanceInput" 
+              name="totalBalance" 
+              value="${totalBalance}" 
+              step="0.01" 
+              required 
+              style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(148,163,184,.35); background: #fbfcfe;"
+            />
+          </div>
+          
+          <div class="form__field">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <label class="form__label">Categories</label>
+              <button 
+                type="button" 
+                id="addCategory"
+                class="btn btn--primary"
+                style="padding: 6px 12px; font-size: 0.85rem;"
+              >+ Add Category</button>
+            </div>
+            <div id="categoriesList">
+              ${categoriesHTML}
+            </div>
+          </div>
+          
+          <div class="form__field" style="margin-top: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <label class="form__label">Who Pays</label>
+              <button 
+                type="button" 
+                id="addPayer"
+                class="btn btn--primary"
+                style="padding: 6px 12px; font-size: 0.85rem;"
+              >+ Add Person</button>
+            </div>
+            <div id="payersList">
+              ${payersHTML}
+            </div>
+          </div>
+          
+          <div class="modal__footer">
+            <button type="button" class="btn" id="cancelSettings">Cancel</button>
+            <button type="submit" class="btn btn--primary">Save Settings</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(settingsModal);
+  document.body.style.overflow = 'hidden';
+  
+  const settingsClose = settingsModal.querySelector('#settingsClose');
+  const cancelSettings = settingsModal.querySelector('#cancelSettings');
+  const settingsBackdrop = settingsModal.querySelector('.modal__backdrop');
+  const settingsForm = settingsModal.querySelector('#settingsForm');
+  const addCategoryBtn = settingsModal.querySelector('#addCategory');
+  const addPayerBtn = settingsModal.querySelector('#addPayer');
+  
+  const closeSettings = () => {
+    settingsModal.remove();
+    document.body.style.overflow = '';
+  };
+  
+  settingsClose.addEventListener('click', closeSettings);
+  cancelSettings.addEventListener('click', closeSettings);
+  settingsBackdrop.addEventListener('click', closeSettings);
+  
+  // Add Category Handler
+  addCategoryBtn.addEventListener('click', () => {
+    const categoriesList = document.getElementById('categoriesList');
+    const newIndex = categories.length;
+    
+    const newCategoryHTML = `
+      <div class="category-item" style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; padding: 10px; background: #f8fafc; border-radius: 8px;">
+        <input 
+          type="color" 
+          value="#e5e7eb" 
+          data-category-index="${newIndex}"
+          class="category-color"
+          style="width: 40px; height: 40px; border: none; border-radius: 6px; cursor: pointer;"
+        />
+        <input 
+          type="text" 
+          value="New Category" 
+          data-category-index="${newIndex}"
+          class="category-label"
+          placeholder="Category name"
+          style="flex: 1; padding: 8px 12px; border: 1px solid rgba(148,163,184,.35); border-radius: 8px; background: white;"
+        />
+        <button 
+          type="button" 
+          class="delete-category"
+          data-category-index="${newIndex}"
+          style="background: #fee; color: #c00; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: 500;"
+        >Delete</button>
+      </div>
+    `;
+    
+    categoriesList.insertAdjacentHTML('beforeend', newCategoryHTML);
+    
+    const newDeleteBtn = categoriesList.querySelector(`[data-category-index="${newIndex}"].delete-category`);
+    newDeleteBtn.addEventListener('click', function() {
+      this.closest('.category-item').remove();
+    });
+  });
+  
+  // Add Payer Handler
+  addPayerBtn.addEventListener('click', () => {
+    const payersList = document.getElementById('payersList');
+    const newIndex = payers.length;
+    
+    const newPayerHTML = `
+      <div class="payer-item" style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; padding: 10px; background: #f8fafc; border-radius: 8px;">
+        <input 
+          type="text" 
+          value="New Person" 
+          data-payer-index="${newIndex}"
+          class="payer-name"
+          placeholder="Person name"
+          style="flex: 1; padding: 8px 12px; border: 1px solid rgba(148,163,184,.35); border-radius: 8px; background: white;"
+        />
+        <button 
+          type="button" 
+          class="delete-payer"
+          data-payer-index="${newIndex}"
+          style="background: #fee; color: #c00; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: 500;"
+        >Delete</button>
+      </div>
+    `;
+    
+    payersList.insertAdjacentHTML('beforeend', newPayerHTML);
+    
+    const newDeleteBtn = payersList.querySelector(`[data-payer-index="${newIndex}"].delete-payer`);
+    newDeleteBtn.addEventListener('click', function() {
+      this.closest('.payer-item').remove();
+    });
+  });
+  
+  // Delete Category Handlers
+  settingsModal.querySelectorAll('.delete-category').forEach(btn => {
+    btn.addEventListener('click', function() {
+      if (settingsModal.querySelectorAll('.category-item').length <= 1) {
+        alert('You must have at least one category!');
+        return;
+      }
+      this.closest('.category-item').remove();
+    });
+  });
+  
+  // Delete Payer Handlers
+  settingsModal.querySelectorAll('.delete-payer').forEach(btn => {
+    btn.addEventListener('click', function() {
+      if (settingsModal.querySelectorAll('.payer-item').length <= 1) {
+        alert('You must have at least one person!');
+        return;
+      }
+      this.closest('.payer-item').remove();
+    });
+  });
+  
+  // Form Submit Handler
+  settingsForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    const newBalance = parseFloat(e.target.totalBalance.value);
+    totalBalance = newBalance;
+    
+    // Save Categories
+    const newCategories = [];
+    const categoryItems = settingsModal.querySelectorAll('.category-item');
+    
+    categoryItems.forEach((item, index) => {
+      const colorInput = item.querySelector('.category-color');
+      const labelInput = item.querySelector('.category-label');
+      
+      if (labelInput.value.trim()) {
+        const name = labelInput.value.toLowerCase().replace(/[^a-z0-9]/g, '_');
+        
+        newCategories.push({
+          name: name,
+          label: labelInput.value.trim(),
+          color: colorInput.value
+        });
+      }
+    });
+    
+    if (newCategories.length === 0) {
+      alert('You must have at least one category!');
+      return;
+    }
+    
+    categories = newCategories;
+    
+    // Save Payers
+    const newPayers = [];
+    const payerItems = settingsModal.querySelectorAll('.payer-item');
+    
+    payerItems.forEach((item, index) => {
+      const nameInput = item.querySelector('.payer-name');
+      
+      if (nameInput.value.trim()) {
+        const id = nameInput.value.toLowerCase().replace(/[^a-z0-9]/g, '_');
+        
+        newPayers.push({
+          id: id,
+          name: nameInput.value.trim()
+        });
+      }
+    });
+    
+    if (newPayers.length === 0) {
+      alert('You must have at least one person!');
+      return;
+    }
+    
+    payers = newPayers;
+    
+    saveData();
+    updateCategoryOptions();
+    updateWhoPaysOptions();
+    updateCategoryFilter();
+    updateUI();
+    closeSettings();
+  });
+}
+// Local Storage
+function saveData() {
+  localStorage.setItem('financeExpenses', JSON.stringify(expenses));
+  localStorage.setItem('financeTotalBalance', totalBalance.toString());
+  localStorage.setItem('financeCategories', JSON.stringify(categories));
+  localStorage.setItem('financePayers', JSON.stringify(payers));  // ← AGREGAR ESTA LÍNEA
+}
+
+function loadData() {
+  const savedExpenses = localStorage.getItem('financeExpenses');
+  const savedBalance = localStorage.getItem('financeTotalBalance');
+  const savedCategories = localStorage.getItem('financeCategories');
+  const savedPayers = localStorage.getItem('financePayers');  // ← AGREGAR
+  
+  if (savedExpenses) {
+    expenses = JSON.parse(savedExpenses);
+  }
+  
+  if (savedBalance) {
+    totalBalance = parseFloat(savedBalance);
+  }
+  
+  if (savedCategories) {
+    categories = JSON.parse(savedCategories);
+  }
+  
+  // ← AGREGAR ESTE BLOQUE
+  if (savedPayers) {
+    payers = JSON.parse(savedPayers);
+  }
+}
+    </script>
   </body>
 </html>
