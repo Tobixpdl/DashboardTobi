@@ -92,7 +92,7 @@ body {
 
 /* Cards / Stats */
 .stats {
-  display: grid; gap: 12px; padding: 16px; grid-template-columns: repeat(3, minmax(0,1fr));
+  display: grid; gap: 12px; padding: 16px; grid-template-columns: repeat(4, minmax(0,1fr));
 }
 .card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px; border: 1px solid rgba(148,163,184,.18); }
 .card--stat { display: grid; gap: 10px; }
@@ -398,13 +398,18 @@ body {
             <div class="card__value" id="totalBalanceValue">$12,450</div>
           </article>
           <article class="card card--stat">
-            <div class="card__label">Monthly Expenses</div>
-            <div class="card__value" id="monthlyExpensesValue">$0</div>
-            <div id="expensesByPerson" style="margin-top: 12px; font-size: 0.75rem; color: var(--muted); display: flex; flex-direction: column; gap: 4px;"></div>
+            <div class="card__label">Credit Expenses</div>
+            <div class="card__value" id="creditExpensesValue">$0</div>
+            <div id="creditByPerson" style="margin-top: 12px; font-size: 0.75rem; color: var(--muted); display: flex; flex-direction: column; gap: 4px;"></div>
+          </article>
+          <article class="card card--stat">
+            <div class="card__label">Cash/Debit Expenses</div>
+            <div class="card__value" id="cashDebitExpensesValue">$0</div>
+            <div id="cashDebitByPerson" style="margin-top: 12px; font-size: 0.75rem; color: var(--muted); display: flex; flex-direction: column; gap: 4px;"></div>
           </article>
           <article class="card card--stat">
             <div class="card__label">Savings Rate</div>
-            <div class="card__value" id="savingsRateValue">0%</div>
+            <div class="card__value" id="savingsRateValue">0x</div>
           </article>
         </section>
 
@@ -835,17 +840,19 @@ function calculateCategoryExpenses() {
   return categoryTotals;
 }
 
+// POR esta nueva versión:
 function calculateSavingsRate() {
-  const monthlyExpenses = calculateMonthlyExpenses();
-  const estimatedMonthlyIncome = totalBalance / 6;
-  
-  if (estimatedMonthlyIncome === 0) return 0;
-  
-  const savings = estimatedMonthlyIncome - monthlyExpenses;
-  const rate = (savings / estimatedMonthlyIncome) * 100;
-  
-  return Math.max(0, Math.min(100, rate));
+  const expensesByPerson = calculateExpensesByPerson();
+  const tobiExpenses = expensesByPerson['tobi'] || 0;
+
+  if (totalBalance === 0) return 0;
+
+  const savings = totalBalance - tobiExpenses;
+  const rate = (savings / totalBalance) * 100;
+
+  return rate.toFixed(1); // devuelve porcentaje con un decimal
 }
+
 
 function calculateExpensesByPerson() {
   const personTotals = {};
@@ -890,23 +897,100 @@ function calculateExpensesByPerson() {
   return personTotals;
 }
 
+// AGREGAR estas dos nuevas funciones después de calculateExpensesByPerson():
+
+function calculateCreditExpensesByPerson() {
+  const personTotals = {};
+  
+  payers.forEach(payer => {
+    personTotals[payer.id] = 0;
+  });
+  
+  expenses.forEach(expense => {
+    if (expense.method !== 'credit') return; // Solo crédito
+    
+    const expenseDate = new Date(expense.date);
+    const expenseMonth = expenseDate.getMonth();
+    const expenseYear = expenseDate.getFullYear();
+    const whoPays = expense.whoPays || 'tobi';
+    
+    if (expense.isMonthly) {
+      const startDate = new Date(expense.date);
+      const checkDate = new Date(currentYear, currentMonth, 1);
+      
+      if (startDate <= checkDate) {
+        personTotals[whoPays] = (personTotals[whoPays] || 0) + expense.amount;
+      }
+    }
+    else if (expense.payments > 1) {
+      const monthsDiff = (currentYear - expenseYear) * 12 + (currentMonth - expenseMonth);
+      
+      if (monthsDiff >= 0 && monthsDiff < expense.payments) {
+        const monthlyAmount = expense.amount / expense.payments;
+        personTotals[whoPays] = (personTotals[whoPays] || 0) + monthlyAmount;
+      }
+    }
+    else {
+      if (expenseMonth === currentMonth && expenseYear === currentYear) {
+        personTotals[whoPays] = (personTotals[whoPays] || 0) + expense.amount;
+      }
+    }
+  });
+  
+  return personTotals;
+}
+
+function calculateCashDebitExpensesByPerson() {
+  const personTotals = {};
+  
+  payers.forEach(payer => {
+    personTotals[payer.id] = 0;
+  });
+  
+  expenses.forEach(expense => {
+    if (expense.method === 'credit') return; // Solo cash y debit
+    
+    const expenseDate = new Date(expense.date);
+    const expenseMonth = expenseDate.getMonth();
+    const expenseYear = expenseDate.getFullYear();
+    const whoPays = expense.whoPays || 'tobi';
+    
+    if (expense.isMonthly) {
+      const startDate = new Date(expense.date);
+      const checkDate = new Date(currentYear, currentMonth, 1);
+      
+      if (startDate <= checkDate) {
+        personTotals[whoPays] = (personTotals[whoPays] || 0) + expense.amount;
+      }
+    }
+    else {
+      if (expenseMonth === currentMonth && expenseYear === currentYear) {
+        personTotals[whoPays] = (personTotals[whoPays] || 0) + expense.amount;
+      }
+    }
+  });
+  
+  return personTotals;
+}
+
 // UI Updates
+// REEMPLAZAR toda la función updateUI() por esta:
 function updateUI() {
-  // Update stats
+  // Update balance
   document.getElementById('totalBalanceValue').textContent = 
-    `${totalBalance.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+    `$${totalBalance.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
   
-  const monthlyExpenses = calculateMonthlyExpenses();
-  document.getElementById('monthlyExpensesValue').textContent = 
-    `${monthlyExpenses.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+  // Calculate credit expenses
+  const creditExpenses = calculateCreditExpensesByPerson();
+  const totalCredit = Object.values(creditExpenses).reduce((sum, val) => sum + val, 0);
+  document.getElementById('creditExpensesValue').textContent = 
+    `$${totalCredit.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
   
-  // Calculate and show expenses by person
-  const expensesByPerson = calculateExpensesByPerson();
-  const expensesByPersonContainer = document.getElementById('expensesByPerson');
-  if (expensesByPersonContainer) {
-    expensesByPersonContainer.innerHTML = '';
+  const creditByPersonContainer = document.getElementById('creditByPerson');
+  if (creditByPersonContainer) {
+    creditByPersonContainer.innerHTML = '';
     payers.forEach(payer => {
-      const amount = expensesByPerson[payer.id] || 0;
+      const amount = creditExpenses[payer.id] || 0;
       const div = document.createElement('div');
       div.style.display = 'flex';
       div.style.justifyContent = 'space-between';
@@ -914,13 +998,35 @@ function updateUI() {
         <span style="font-weight: 500;">${payer.name}:</span>
         <span style="font-weight: 600;">$${amount.toFixed(0)}</span>
       `;
-      expensesByPersonContainer.appendChild(div);
+      creditByPersonContainer.appendChild(div);
     });
   }
   
+  // Calculate cash/debit expenses
+  const cashDebitExpenses = calculateCashDebitExpensesByPerson();
+  const totalCashDebit = Object.values(cashDebitExpenses).reduce((sum, val) => sum + val, 0);
+  document.getElementById('cashDebitExpensesValue').textContent = 
+    `$${totalCashDebit.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+  
+  const cashDebitByPersonContainer = document.getElementById('cashDebitByPerson');
+  if (cashDebitByPersonContainer) {
+    cashDebitByPersonContainer.innerHTML = '';
+    payers.forEach(payer => {
+      const amount = cashDebitExpenses[payer.id] || 0;
+      const div = document.createElement('div');
+      div.style.display = 'flex';
+      div.style.justifyContent = 'space-between';
+      div.innerHTML = `
+        <span style="font-weight: 500;">${payer.name}:</span>
+        <span style="font-weight: 600;">$${amount.toFixed(0)}</span>
+      `;
+      cashDebitByPersonContainer.appendChild(div);
+    });
+  }
+  
+  // Update savings rate
   const savingsRate = calculateSavingsRate();
-  document.getElementById('savingsRateValue').textContent = 
-    `${savingsRate.toFixed(0)}%`;
+  document.getElementById('savingsRateValue').textContent = `${savingsRate}%`;
   
   renderCategoryChart();
   if (currentView === 'expenses') {
