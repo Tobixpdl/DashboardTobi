@@ -860,7 +860,7 @@ function renderCategoryChart() {
   if (totalExpenses === 0) {
     container.innerHTML = `
       <div class="empty-state">
-        <div class="empty-state-icon">ðŸ“Š</div>
+        <div class="empty-state-icon">💰</div>
         <p>No expenses this month. Add your first expense to see the breakdown!</p>
       </div>
     `;
@@ -1075,7 +1075,7 @@ function renderExpensesList() {
   if (filteredExpenses.length === 0) {
     container.innerHTML = `
       <div class="empty-state">
-        <div class="empty-state-icon">ðŸ”</div>
+        <div class="empty-state-icon">📊</div>
         <p>No expenses found with the selected filters.</p>
       </div>
     `;
@@ -1119,7 +1119,7 @@ function createExpenseCard(expense) {
     const monthlyBadge = document.createElement('span');
     monthlyBadge.className = 'expense-badge';
     monthlyBadge.style.background = '#fef3c7';
-    monthlyBadge.textContent = 'ðŸ”„ Monthly';
+    monthlyBadge.textContent = '🔄 Monthly';
     header.appendChild(monthlyBadge);
   }
   
@@ -1148,7 +1148,7 @@ function createExpenseCard(expense) {
   
   const deleteBtn = document.createElement('button');
   deleteBtn.className = 'delete-btn';
-  deleteBtn.textContent = 'ðŸ—‘ï¸';
+  deleteBtn.textContent = '🗑️';
   deleteBtn.onclick = () => deleteExpense(expense.id);
   deleteBtn.setAttribute('aria-label', 'Delete expense');
   
@@ -1748,7 +1748,7 @@ function openProfileModal() {
     <div class="modal__dialog" style="max-width: 400px;">
       <header class="modal__header">
         <h3>Your Profile</h3>
-        <button class="modal__close" id="profileClose">âœ•</button>
+        <button class="modal__close" id="profileClose">✕</button>
       </header>
       <div class="modal__body">
         <form id="profileForm">
@@ -1809,7 +1809,7 @@ function openProfileModal() {
     userFullName = e.target.userFullName.value.trim();
     
     // Update UI
-    document.querySelector('.topbar__greeting h1').textContent = `Welcome back, ${userName} ðŸ‘‹`;
+    document.querySelector('.topbar__greeting h1').textContent = `Welcome back, ${userName} 👋`;
     document.querySelector('.topbar__greeting p').textContent = userFullName;
     document.querySelector('.topbar__profile').setAttribute('title', userFullName);
     
@@ -1824,7 +1824,7 @@ function openProfileModal() {
 
 // Update profile on load
 function updateProfileUI() {
-  document.querySelector('.topbar__greeting h1').textContent = `Welcome back, ${userName} ðŸ‘‹`;
+  document.querySelector('.topbar__greeting h1').textContent = `Welcome back, ${userName} 👋`;
   document.querySelector('.topbar__greeting p').textContent = userFullName;
   document.querySelector('.topbar__profile').setAttribute('title', userFullName);
   
