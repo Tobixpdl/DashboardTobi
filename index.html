@@ -4,9 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Personal finance tracker with expense management and analytics" />
-    <meta name="theme-color" content="#a7c7e7" />
+    <meta name="theme-color" content="#ffffff" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="light-content" />
+    <meta name="color-scheme" content="light" />
     <meta name="apple-mobile-web-app-title" content="Finanzas" />
     <title>Tobi Finance Dashboard</title>
 
@@ -19,6 +20,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   </head>
   <body>
     <div class="app">
@@ -63,7 +66,7 @@
             <h1>Welcome back, Tobias 👋</h1>
             <p>Tobias Ponce de Leon</p>
           </div>
-          <div class="topbar__profile" aria-label="User profile" title="Tobias Ponce de Leon">
+          <div class="topbar__profile" aria-label="User profile" title="Tobias Ponce de Leon" id="profileAvatar" style="cursor: pointer;">
             <div class="avatar">TP</div>
             <button class="btn btn--primary topbar__action" id="addExpenseTop">Add Expense</button>
           </div>
@@ -71,31 +74,49 @@
 
         <!-- Stats Cards -->
         <section class="stats">
-          <article class="card card--stat">
-            <div class="card__label">Total Balance</div>
-            <div class="card__value" id="totalBalanceValue">$12,450</div>
+          <div class="div-articleStats">
+            <article class="card card--stat balance">
+              <div class="card__label">Total Balance</div>
+              <div class="card__value" id="totalBalanceValue">$12,450</div>
+            </article>
+            <article class="card card--stat">
+              <div class="card__label">Savings Rate</div>
+              <div class="card__value" id="savingsRateValue">0x</div>
+            </article>   
+          </div>
+          <article class="card card--stat credit-debit">
+            <div class="div-credit">   
+              <div class="card__label">Credit Expenses</div>
+              <div class="card__value" id="creditExpensesValue">$0</div>
+            </div>
+            <div id="creditByPerson" style="margin-top: 12px; font-size: 0.75rem; color: var(--muted); display: flex; flex-direction: column; gap: 2px;"></div>
           </article>
-          <article class="card card--stat">
-            <div class="card__label">Credit Expenses</div>
-            <div class="card__value" id="creditExpensesValue">$0</div>
-            <div id="creditByPerson" style="margin-top: 12px; font-size: 0.75rem; color: var(--muted); display: flex; flex-direction: column; gap: 4px;"></div>
-          </article>
-          <article class="card card--stat">
-            <div class="card__label">Cash/Debit Expenses</div>
-            <div class="card__value" id="cashDebitExpensesValue">$0</div>
-            <div id="cashDebitByPerson" style="margin-top: 12px; font-size: 0.75rem; color: var(--muted); display: flex; flex-direction: column; gap: 4px;"></div>
-          </article>
-          <article class="card card--stat">
-            <div class="card__label">Savings Rate</div>
-            <div class="card__value" id="savingsRateValue">0x</div>
+          <article class="card card--stat credit-debit">
+            <div class="div-debit">
+              <div class="card__label">Cash/Debit Expenses</div>
+              <div class="card__value" id="cashDebitExpensesValue">$0</div>
+            </div>
+            <div id="cashDebitByPerson" style="margin-top: 12px; font-size: 0.75rem; color: var(--muted); display: flex; flex-direction: column; gap: 2px;"></div>
           </article>
         </section>
+        
 
-        <!-- Overview View -->
-        <section class="view is-active" id="overviewView">
+      <!-- Overview View -->
+      <section id="overviewChartView">
+        <div class="card" style="padding: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+          <h2 style="font-size: 1.05rem; margin: 0 0 20px; color: #465a72; text-align: center;">Expenses Distribution</h2>
+          <div style="width: 100%; max-width: 400px; position: relative;">
+            <canvas id="expensesDonutChart"></canvas>
+          </div>
+          <div id="chartLegend" style="margin-top: 20px; width: 100%;"></div>
+        </div>
+      </section>
+      
+      <section class="view is-active" id="overviewView">
+        <div style="display: grid; gap: 16px; align-items: start;">
           <div id="categoryChartContainer"></div>
-        </section>
-
+        </div>
+      </section>
         <!-- Expenses View -->
         <section class="view" id="expensesView">
           <div class="expenses-filters">
@@ -123,6 +144,60 @@
           </div>
           <div class="expenses-list" id="expensesList"></div>
         </section>
+
+        <!-- Settings View -->
+<section class="view" id="settingsView">
+  <div class="settings-container">    
+    <div class="card" style="margin-bottom: 16px;">
+      <h3 style="font-size: 1rem; margin: 0 0 16px; color: #465a72;">Total Balance</h3>
+      <div class="form__field">
+        <input 
+          type="number" 
+          id="totalBalanceInput" 
+          step="0.01" 
+          style="width: 100%; max-width: 300px;"
+        />
+      </div>
+      <button class="btn btn--primary" id="saveBalance" style="margin-top: 12px;">Save Balance</button>
+    </div>
+
+    <div class="card" style="margin-bottom: 16px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3 style="font-size: 1rem; margin: 0; color: #465a72;">Categories</h3>
+        <button class="btn btn--primary" id="addCategoryBtn">+ Add Category</button>
+      </div>
+      <div id="categoriesListView"></div>
+    </div>
+
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3 style="font-size: 1rem; margin: 0; color: #465a72;">Who Pays</h3>
+        <button class="btn btn--primary" id="addPayerBtn">+ Add Person</button>
+      </div>
+      <div id="payersListView"></div>
+    </div>
+
+      <div class="card" style="margin-top: 16px;">
+      <h3 style="font-size: 1rem; margin: 0 0 16px; color: #465a72;">Data Management</h3>
+      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <button class="btn" id="exportDataBtn">📥 Export Data</button>
+        <label for="importFileBtn" class="btn" style="cursor: pointer;">📤 Import Data</label>
+        <input type="file" id="importFileBtn" accept=".json" style="display: none;" />
+      </div>
+      <p style="font-size: 0.75rem; color: var(--muted); margin-top: 8px;">
+        Export your data to backup or transfer to another device. Import to restore.
+      </p>
+    </div>
+    <div class="card" style="margin-bottom: 16px;">
+      <h3 style="font-size: 1rem; margin: 0 0 16px; color: #465a72;">Language / Idioma</h3>
+      <select id="languageSelect" class="form__field" style="max-width: 200px; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(148,163,184,.35); background: #fbfcfe;">
+        <option value="en">English</option>
+        <option value="es">Español</option>
+      </select>
+    </div>
+  </div>
+</section>
+
       </div>
 
       <!-- Floating Add Expense Button (mobile) -->
@@ -190,7 +265,44 @@
           </div>
         </div>
       </div>
+
+      <!-- Bottom Navigation (Mobile Only) -->
+      <nav class="bottom-nav" id="bottomNav">
+        <button class="bottom-nav__item is-active" data-view="overview">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 10.5L12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-10.5Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="bottom-nav__label">Overview</span>
+        </button>
+        
+        <button class="bottom-nav__item" data-view="expenses">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 6h16M4 12h16M4 18h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <span class="bottom-nav__label">Expenses</span>
+        </button>
+        
+        <button class="bottom-nav__item" data-view="settings">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09c0-.67-.39-1.28-1-1.51a1.65 1.65 0 0 0-1.82.33l-.06.06A2 2 0 1 1 4.4 19.4l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09c.67 0 1.28-.39 1.51-1a1.65 1.65 0 0 0-.33-1.82l-.06-.06A2 2 0 1 1 4.4 4.6l.06.06c.49.49 1.2.64 1.82.33.61-.23 1-.84 1-1.51V3a2 2 0 1 1 4 0v.09c0 .67.39 1.28 1 1.51.62.31 1.33.16 1.82-.33l.06-.06A2 2 0 1 1 19.4 4.6l-.06.06c-.49.49-.64 1.2-.33 1.82.23.61.84 1 1.51 1H21a2 2 0 1 1 0 4h-.09c-.67 0-1.28.39-1.51 1Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <span class="bottom-nav__label">Settings</span>
+        </button>
+      </nav>
+
     </div>
   </body>
-  <script src="script.js"></script>
+  <script src="js/script.js"></script>
+>
+  <script src="js/translations.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/calculations.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/modal.js"></script>
+  <script src="js/settings.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/main.js"></script>
 </html>

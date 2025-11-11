@@ -1,11 +1,12 @@
 {
-  "name": "Tobi Finance Dashboard",
-  "short_name": "TobiFinance",
+  "name": "Tobi Finance",
+  "short_name": "Finanzas",
+  "theme_color": "#ffffff",
+  "background_color": "#f8fafc",
+  "display": "standalone",
+  "display_override": ["standalone"],
   "description": "Personal finance tracker with expense management and analytics",
   "start_url": "./index.html", 
-  "display": "standalone",
-  "background_color": "#f8fafc",
-  "theme_color": "#a7c7e7",
   "orientation": "portrait-primary",
   "icons": [
     {
