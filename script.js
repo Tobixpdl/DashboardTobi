@@ -1127,12 +1127,12 @@ function createExpenseCard(expense) {
   details.className = 'expense-details';
   
   let detailsText = '';
-  if (expense.place) detailsText += expense.place + ' â€¢ ';
+  if (expense.place) detailsText += expense.place + ' • ';
   detailsText += expense.method;
   if (expense.method === 'credit' && expense.payments > 1) {
     detailsText += ` (${expense.payments} payments)`;
   }
-  detailsText += ' â€¢ ' + formatDate(expense.date);
+  detailsText += ' • ' + formatDate(expense.date);
   
   details.textContent = detailsText;
   
